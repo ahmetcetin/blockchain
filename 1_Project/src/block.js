@@ -34,22 +34,28 @@ class Block {
    *  5. Resolve true or false depending if it is valid or not.
    *  Note: to access the class values inside a Promise code you need to create an auxiliary value `let self = this;`
    */
-  validate = () =>
-    new Promise((yay) => {
+  validate = () => {
+    const self = this;
+
+    return new Promise((yay) => {
       // Save in auxiliary variable the current block hash
-      const calculatedHash = SHA256(JSON.stringify(this)).toString();
+
+      const selfCopy = { ...self };
+      delete selfCopy.hash;
+
+      const calculatedHash = SHA256(JSON.stringify(selfCopy)).toString();
 
       // Recalculate the hash of the Block
       // Comparing if the hashes changed
       // Returning the Block is not valid
-      if (calculatedHash !== this.hash) {
+      if (calculatedHash !== self.hash) {
         return yay(false);
       }
 
       // Returning the Block is valid
       yay(true);
     });
-
+  };
   /**
    *  Auxiliary Method to return the block body (decoding the data)
    *  Steps:
@@ -59,19 +65,22 @@ class Block {
    *  3. Resolve with the data and make sure that you don't need to return the data for the `genesis block`
    *     or Reject with an error.
    */
-  getBData = () =>
+  getBData = () => {
     // Getting the encoded data saved in the Block
     // Decoding the data to retrieve the JSON representation of the object
     // Parse the data to an object to be retrieve.
     // Resolve with the data if the object isn't the Genesis block
 
-    new Promise((yay, nah) => {
-      if (this.height === 0) {
+    const self = this;
+
+    return new Promise((yay, nah) => {
+      if (self.height === 0) {
         return nah('Genesis block does not have data');
       }
 
-      yay(JSON.parse(hex2ascii(this.body)));
+      yay(JSON.parse(hex2ascii(self.body)));
     });
+  };
 }
 
 module.exports.Block = Block; // Exposing the Block class as a module
